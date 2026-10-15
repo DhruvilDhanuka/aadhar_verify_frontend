@@ -1,16 +1,25 @@
-function Results({ data }) {
-  const verdict = data.verdict; // "PASS", "FAIL", "RE-UPLOAD", "FLAG"
+import PropTypes from "prop-types";
+
+function Results({ data = {} }) {
+  if (!data || Object.keys(data).length === 0) return null;
+
+  const verdict = data?.verdict; // "PASS", "FAIL", "RE-UPLOAD", "FLAG"
   const isPass = verdict === "PASS" || verdict === "PARTIAL_PASS";
   const isFail = verdict === "FAIL";
   const isReupload = verdict === "RE-UPLOAD" || verdict === "FLAG";
 
   const bannerClass = isPass ? "pass" : isFail ? "fail" : "reupload";
-  const bannerIcon = isPass ? "✅" : isFail ? "❌" : "🔄";
+  const bannerIcon = isPass ? "\u2705" : isFail ? "\u274C" : "\uD83D\uDD04";
 
-  const qrData = data.qr_data || {};
-  const ocrData = data.ocr_data || {};
-  const regData = data.registration_data || {};
-  const checks = data.cross_checks || {};
+  const qrData = data?.qr_data || {};
+  const ocrData = data?.ocr_data || data?.ocr_result || {};
+  const regData = data?.registration_data || {};
+  const checks = data?.cross_checks || {};
+
+  // OCR is considered available only if backend returned OCR data with actual extracted content
+  const ocrAvailable =
+    Boolean(ocrData && typeof ocrData === "object" && Object.keys(ocrData).length > 0) &&
+    Boolean(ocrData?.detected_dob || ocrData?.text_snippet || ocrData?.text);
 
   return (
     <div className="results">
@@ -19,15 +28,15 @@ function Results({ data }) {
         <span className="verdict-icon">{bannerIcon}</span>
         <div className="verdict-text">
           <h2>Verdict: {verdict === "RE-UPLOAD" ? "RE-UPLOAD REQUIRED" : verdict}</h2>
-          <p>{data.verdict_reason}</p>
+          <p>{data?.verdict_reason}</p>
         </div>
       </div>
 
       {/* Prominent Action Callout for Re-upload */}
-      {data.reupload_required && data.reupload_message && (
+      {data?.reupload_required && data?.reupload_message && (
         <div className="reupload-callout">
           <div className="reupload-header">
-            <span className="reupload-icon">⚠️</span>
+            <span className="reupload-icon">{"\u26A0\uFE0F"}</span>
             <strong>Action Required:</strong>
           </div>
           <p className="reupload-text">{data.reupload_message}</p>
@@ -43,11 +52,11 @@ function Results({ data }) {
             <div className="compare-card-title">1. Registration Form</div>
             <div className="compare-row">
               <span className="label">Name:</span>
-              <span className="value">{regData.name || "—"}</span>
+              <span className="value">{regData?.name || "\u2014"}</span>
             </div>
             <div className="compare-row">
               <span className="label">DOB:</span>
-              <span className="value">{regData.dob || "—"}</span>
+              <span className="value">{regData?.dob || "\u2014"}</span>
             </div>
             <div className="compare-badge badge-neutral">User Input</div>
           </div>
@@ -57,59 +66,72 @@ function Results({ data }) {
             <div className="compare-card-title">2. UIDAI QR Code</div>
             <div className="compare-row">
               <span className="label">Status:</span>
-              <span className={`value ${qrData.decoded ? "match" : "neutral"}`}>
-                {qrData.decoded ? "Decoded" : "Unreadable / Missing"}
+              <span className={`value ${qrData?.decoded ? "match" : "neutral"}`}>
+                {qrData?.decoded ? "Decoded" : "Unreadable / Missing"}
               </span>
             </div>
-            {qrData.decoded ? (
+            {qrData?.decoded ? (
               <>
                 <div className="compare-row">
                   <span className="label">Name:</span>
-                  <span className="value">{qrData.name || "—"}</span>
+                  <span className="value">{qrData?.name || "\u2014"}</span>
                 </div>
                 <div className="compare-row">
                   <span className="label">DOB:</span>
                   <span className="value">
-                    {qrData.dob || (isPass && ocrData.detected_dob ? `${ocrData.detected_dob} (via Card)` : "—")}
+                    {qrData?.dob || (isPass && ocrData?.detected_dob ? `${ocrData.detected_dob} (via Card)` : "\u2014")}
                   </span>
                 </div>
                 <div className="compare-row">
                   <span className="label">Gender:</span>
-                  <span className="value">{qrData.gender || "—"}</span>
+                  <span className="value">{qrData?.gender || "\u2014"}</span>
                 </div>
                 <div className="compare-row">
                   <span className="label">Ref ID:</span>
-                  <span className="value">{qrData.reference_id || "—"}</span>
+                  <span className="value">{qrData?.reference_id || "\u2014"}</span>
                 </div>
                 <div className="compare-row">
                   <span className="label">PDF Signature:</span>
-                  <span className="value match">Verified ✅</span>
+                  <span className="value match">{"Verified \u2705"}</span>
                 </div>
               </>
             ) : (
-              <p className="missing-hint">QR unreadable — verified via Printed Card OCR fallback.</p>
+              <p className="missing-hint">{"QR unreadable \u2014 verified via Printed Card OCR fallback."}</p>
             )}
-            <div className={`compare-badge ${qrData.decoded ? "badge-success" : "badge-neutral"}`}>
-              {qrData.decoded ? "UIDAI QR Data" : "Fell Back to OCR"}
+            <div className={`compare-badge ${qrData?.decoded ? "badge-success" : "badge-neutral"}`}>
+              {qrData?.decoded ? "UIDAI QR Data" : "Fell Back to OCR"}
             </div>
           </div>
 
           {/* Card 3: Card OCR */}
           <div className="compare-card">
             <div className="compare-card-title">3. Printed Card (OCR)</div>
-            <div className="compare-row">
-              <span className="label">Name in Text:</span>
-              <span className="value">
-                {checks.registration_vs_card_text ? "Found in Card ✅" : "—"}
-              </span>
-            </div>
-            <div className="compare-row">
-              <span className="label">DOB:</span>
-              <span className="value">{ocrData.detected_dob || "—"}</span>
-            </div>
-            <div className="compare-badge badge-neutral">
-              Printed Text
-            </div>
+            {ocrAvailable ? (
+              <>
+                <div className="compare-row">
+                  <span className="label">Name in Text:</span>
+                  <span className="value">
+                    {checks?.registration_vs_card_text === true
+                      ? "Found in Card \u2705"
+                      : checks?.registration_vs_card_text === false
+                        ? "Not Found \u274C"
+                        : "\u2014"}
+                  </span>
+                </div>
+                <div className="compare-row">
+                  <span className="label">DOB:</span>
+                  <span className="value">{ocrData?.detected_dob || "\u2014"}</span>
+                </div>
+                <div className="compare-badge badge-neutral">
+                  Printed Text
+                </div>
+              </>
+            ) : (
+              <>
+                <p className="missing-hint">OCR was not performed (verified via QR code).</p>
+                <div className="compare-badge badge-neutral">Skipped</div>
+              </>
+            )}
           </div>
         </div>
       </div>
@@ -121,21 +143,20 @@ function Results({ data }) {
           {/* Check 1: Registration vs QR */}
           <li className="cross-check-item">
             <span
-              className={`check-icon ${
-                !qrData.decoded
-                  ? "neutral"
-                  : checks.registration_vs_qr === true
+              className={`check-icon ${!qrData?.decoded
+                ? "neutral"
+                : checks?.registration_vs_qr === true
                   ? "match"
                   : "mismatch"
-              }`}
+                }`}
             >
-              {!qrData.decoded ? "—" : checks.registration_vs_qr === true ? "✅" : "❌"}
+              {!qrData?.decoded ? "\u2014" : checks?.registration_vs_qr === true ? "\u2705" : "\u274C"}
             </span>
             <div className="check-detail">
-              <strong>Registration ↔ QR Match</strong>
+              <strong>{"Registration \u2194 QR Match"}</strong>
               <p>
-                {qrData.decoded
-                  ? checks.registration_vs_qr === true
+                {qrData?.decoded
+                  ? checks?.registration_vs_qr === true
                     ? "Registration details match the official QR code data."
                     : "Mismatch: The registered user does not match the person inside the QR!"
                   : "Skipped (QR unreadable, verified via Printed Card OCR instead)."}
@@ -146,24 +167,35 @@ function Results({ data }) {
           {/* Check 2: QR vs Printed Card Text */}
           <li className="cross-check-item">
             <span
-              className={`check-icon ${
-                !qrData.decoded
-                  ? "neutral"
-                  : checks.qr_vs_card_text === true
+              className={`check-icon ${!qrData?.decoded || !ocrAvailable
+                ? "neutral"
+                : checks?.qr_vs_card_text === true
                   ? "match"
-                  : "mismatch"
-              }`}
+                  : checks?.qr_vs_card_text === false
+                    ? "mismatch"
+                    : "neutral"
+                }`}
             >
-              {!qrData.decoded ? "—" : checks.qr_vs_card_text === true ? "✅" : "❌"}
+              {!qrData?.decoded || !ocrAvailable
+                ? "\u2014"
+                : checks?.qr_vs_card_text === true
+                  ? "\u2705"
+                  : checks?.qr_vs_card_text === false
+                    ? "\u274C"
+                    : "\u2014"}
             </span>
             <div className="check-detail">
-              <strong>QR ↔ Printed Card Text</strong>
+              <strong>{"QR \u2194 Printed Card Text"}</strong>
               <p>
-                {qrData.decoded
-                  ? checks.qr_vs_card_text === true
-                    ? "Printed text on the card matches the QR payload."
-                    : "Printed card text differs from the QR payload."
-                  : "Skipped (QR not decoded)."}
+                {!qrData?.decoded
+                  ? "Skipped (QR not decoded)."
+                  : !ocrAvailable
+                    ? "Skipped (OCR was not performed)."
+                    : checks?.qr_vs_card_text === true
+                      ? "Printed text on the card matches the QR payload."
+                      : checks?.qr_vs_card_text === false
+                        ? "Printed card text differs from the QR payload."
+                        : "Check was not performed."}
               </p>
             </div>
           </li>
@@ -171,26 +203,33 @@ function Results({ data }) {
           {/* Check 3: Registration vs Printed Card Text */}
           <li className="cross-check-item">
             <span
-              className={`check-icon ${
-                checks.registration_vs_card_text === true
+              className={`check-icon ${!ocrAvailable
+                ? "neutral"
+                : checks?.registration_vs_card_text === true
                   ? "match"
-                  : checks.registration_vs_card_text === false
-                  ? "mismatch"
-                  : "neutral"
-              }`}
+                  : checks?.registration_vs_card_text === false
+                    ? "mismatch"
+                    : "neutral"
+                }`}
             >
-              {checks.registration_vs_card_text === true
-                ? "✅"
-                : checks.registration_vs_card_text === false
-                ? "❌"
-                : "—"}
+              {!ocrAvailable
+                ? "\u2014"
+                : checks?.registration_vs_card_text === true
+                  ? "\u2705"
+                  : checks?.registration_vs_card_text === false
+                    ? "\u274C"
+                    : "\u2014"}
             </span>
             <div className="check-detail">
-              <strong>Registration ↔ Printed Card Text (OCR)</strong>
+              <strong>{"Registration \u2194 Printed Card Text (OCR)"}</strong>
               <p>
-                {checks.registration_vs_card_text === true
-                  ? "Printed text on the card matches the registration details."
-                  : "Printed text on the card does not match the entered registration details."}
+                {!ocrAvailable
+                  ? "Skipped (OCR was not performed)."
+                  : checks?.registration_vs_card_text === true
+                    ? "Printed text on the card matches the registration details."
+                    : checks?.registration_vs_card_text === false
+                      ? "Printed text on the card does not match the entered registration details."
+                      : "Check was not performed."}
               </p>
             </div>
           </li>
