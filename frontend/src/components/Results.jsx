@@ -1,4 +1,3 @@
-import PropTypes from "prop-types";
 
 function Results({ data = {} }) {
   if (!data || Object.keys(data).length === 0) return null;
