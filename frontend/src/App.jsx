@@ -3,7 +3,7 @@ import "./App.css";
 import VerifyForm from "./components/VerifyForm";
 import Results from "./components/Results";
 
-const API_URL = "http://localhost:8000/api/verify";
+const API_URL = " https://aadhar-verify-backend.onrender.com/api/verify";
 
 function App() {
   const [result, setResult] = useState(null);
