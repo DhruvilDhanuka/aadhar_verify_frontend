@@ -57,6 +57,14 @@ function Results({ data = {} }) {
               <span className="label">DOB:</span>
               <span className="value">{regData?.dob || "\u2014"}</span>
             </div>
+            {regData?.age != null && (
+              <div className="compare-row">
+                <span className="label">Age:</span>
+                <span className={`value ${regData.age >= 18 ? "match" : "mismatch"}`}>
+                  {regData.age} yrs {regData.age >= 18 ? "(18+ ✅)" : "(Under 18 ❌)"}
+                </span>
+              </div>
+            )}
             <div className="compare-badge badge-neutral">User Input</div>
           </div>
 
@@ -85,6 +93,14 @@ function Results({ data = {} }) {
                   <span className="label">Gender:</span>
                   <span className="value">{qrData?.gender || "\u2014"}</span>
                 </div>
+                {regData?.age != null && (
+                  <div className="compare-row">
+                    <span className="label">Age (Verified):</span>
+                    <span className={`value ${regData.age >= 18 ? "match" : "mismatch"}`}>
+                      {regData.age} yrs {regData.age >= 18 ? "(≥ 18 ✅)" : "(< 18 ❌)"}
+                    </span>
+                  </div>
+                )}
                 <div className="compare-row">
                   <span className="label">Ref ID:</span>
                   <span className="value">{qrData?.reference_id || "\u2014"}</span>
@@ -198,6 +214,23 @@ function Results({ data = {} }) {
               </p>
             </div>
           </li>
+
+          {/* Check 4: Age Eligibility (18+) */}
+          {regData?.age != null && (
+            <li className="cross-check-item">
+              <span className={`check-icon ${regData.age >= 18 ? "match" : "mismatch"}`}>
+                {regData.age >= 18 ? "✅" : "❌"}
+              </span>
+              <div className="check-detail">
+                <strong>18+ Age Requirement</strong>
+                <p>
+                  {regData.age >= 18
+                    ? `Attendee is ${regData.age} years old (Meets 18+ requirement for Mood Indigo).`
+                    : `Attendee is ${regData.age} years old (Under 18 — not eligible to attend).`}
+                </p>
+              </div>
+            </li>
+          )}
 
           {/* Check 3: Registration vs Printed Card Text */}
           <li className="cross-check-item">
