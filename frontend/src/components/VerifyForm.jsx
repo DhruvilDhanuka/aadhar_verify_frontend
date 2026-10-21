@@ -1,12 +1,24 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
+import { fetchUserDetailsByEmail } from "../api";
 
-function VerifyForm({ onSubmit, loading }) {
+function VerifyForm({ onSubmit, loading, email }) {
   const [name, setName] = useState("");
   const [dob, setDob] = useState("");
   const [file, setFile] = useState(null);
   const [fileError, setFileError] = useState(null);
   const [dragOver, setDragOver] = useState(false);
   const fileInputRef = useRef(null);
+
+  useEffect(() => {
+    if (email) {
+      fetchUserDetailsByEmail(email).then((details) => {
+        if (details) {
+          if (details.name) setName(details.name);
+          if (details.dob) setDob(details.dob);
+        }
+      });
+    }
+  }, [email]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -67,22 +79,22 @@ function VerifyForm({ onSubmit, loading }) {
     <form className="verify-form" onSubmit={handleSubmit}>
       <div className="form-row">
         <div className="form-group">
-          <label htmlFor="expected-name">Name (as entered during registration)</label>
+          <label htmlFor="expected-name">Name (from registration)</label>
           <input
             id="expected-name"
             type="text"
-            placeholder="e.g. Rajesh Kumar"
+            placeholder="Fetching registered name..."
             value={name}
-            onChange={(e) => setName(e.target.value)}
+            readOnly
           />
         </div>
         <div className="form-group">
-          <label htmlFor="expected-dob">Date of Birth</label>
+          <label htmlFor="expected-dob">Date of Birth (from registration)</label>
           <input
             id="expected-dob"
             type="date"
             value={dob}
-            onChange={(e) => setDob(e.target.value)}
+            readOnly
           />
         </div>
       </div>

@@ -76,6 +76,13 @@
   background: #fff;
 }
 
+.form-group input:read-only {
+  background: #f1f5f9;
+  color: #475569;
+  border-color: #e2e8f0;
+  cursor: default;
+}
+
 /* ── File upload ─────────────────────────────────── */
 .upload-area {
   margin-bottom: 20px;
