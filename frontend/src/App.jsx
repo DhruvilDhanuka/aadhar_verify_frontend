@@ -4,7 +4,8 @@ import VerifyForm from "./components/VerifyForm";
 import Results from "./components/Results";
 
 
-const API_URL = "http://localhost:8000/api/verify";
+//http://localhost:8000/api/verify
+const API_URL = "https://aadhar-verify-backend.onrender.com/api/verify";
 
 function App() {
   const [result, setResult] = useState(null);
@@ -50,7 +51,7 @@ function App() {
     setIsEmailSubmitted(true);
     setError(null);
     try {
-      const res = await fetch("http://localhost:8000/emails/check", {
+      const res = await fetch("https://aadhar-verify-backend.onrender.com/emails/check", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
