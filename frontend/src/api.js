@@ -13,8 +13,8 @@ export async function fetchUserDetailsByEmail(email) {
       dob: "2007-04-10", // YYYY-MM-DD for date input
     },
     "sumit@gmail.com": {
-      name: "Sumit",
-      dob: "1998-05-15",
+      name: "Deep",
+      dob: "2005-08-23",
     },
   };
 

@@ -4,8 +4,14 @@ import VerifyForm from "./components/VerifyForm";
 import Results from "./components/Results";
 
 
-//http://localhost:8000/api/verify
-const API_URL = "https://aadhar-verify-backend.onrender.com/api/verify";
+
+const BACKEND_URL = import.meta.env.VITE_API_BASE_URL || (import.meta.env.DEV
+  ? "http://localhost:8000"
+  : "https://aadhar-verify-backend.onrender.com")
+
+
+const API_VERIFY_URL = `${BACKEND_URL}/api/verify`;
+const API_EMAIL_CHECK_URL = `${BACKEND_URL}/emails/check`;
 
 function App() {
   const [result, setResult] = useState(null);
@@ -25,7 +31,7 @@ function App() {
     formData.append("expected_dob", dob);
 
     try {
-      const res = await fetch(API_URL, {
+      const res = await fetch(API_VERIFY_URL, {
         method: "POST",
         body: formData,
       });
@@ -51,7 +57,7 @@ function App() {
     setIsEmailSubmitted(true);
     setError(null);
     try {
-      const res = await fetch("https://aadhar-verify-backend.onrender.com/emails/check", {
+      const res = await fetch(API_EMAIL_CHECK_URL, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
