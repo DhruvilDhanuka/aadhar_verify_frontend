@@ -593,6 +593,276 @@
   color: #999;
 }
 
+/* ── Page Layout & Backgrounds ────────────────────── */
+.app-container {
+  min-height: 100vh;
+  width: 100%;
+  transition: background-image 0.4s ease, background-color 0.4s ease;
+}
+
+.app-container.bg-concert {
+  background-color: #ffffff;
+  background-image: url('./assets/concert-bg.jpg');
+  background-repeat: no-repeat;
+  background-position: center bottom;
+  background-size: cover;
+  background-attachment: fixed;
+}
+
+.app-container.bg-concert .email-card {
+  background: rgba(255, 255, 255, 0.35);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3), inset 0 1px 2px rgba(255, 255, 255, 0.8);
+}
+
+.app-container.bg-concert .email-card-title {
+  color: #09090b;
+  text-shadow: 0 1px 1px rgba(255, 255, 255, 0.7);
+}
+
+.app-container.bg-concert .email-card-subtitle {
+  color: #18181b;
+  font-weight: 500;
+  text-shadow: 0 1px 1px rgba(255, 255, 255, 0.5);
+}
+
+.app-container.bg-concert .email-card-icon {
+  background: rgba(255, 255, 255, 0.65);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.app-container.bg-concert .email-input {
+  background: rgba(255, 255, 255, 0.82);
+  border-color: rgba(255, 255, 255, 0.9);
+}
+
+.app-container.bg-concert .email-input:focus {
+  background: #ffffff;
+  border-color: #2563eb;
+}
+
+.app-container.bg-verified {
+  background-color: #0c3ea6;
+  background-image: url('./assets/blue-bg.jpg');
+  background-repeat: no-repeat;
+  background-position: center center;
+  background-size: cover;
+  background-attachment: fixed;
+}
+
+.app-container.bg-verified .app h1 {
+  color: #ffffff;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+}
+
+.app-container.bg-verified .app-subtitle {
+  color: #e0e7ff;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.app-container.bg-verified .verified-email-bar {
+  background: rgba(240, 253, 244, 0.96);
+  backdrop-filter: blur(8px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.app-container.bg-verified .privacy-banner {
+  background-color: rgba(232, 244, 253, 0.95);
+  backdrop-filter: blur(8px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.app-container.bg-verified .verify-form {
+  background: rgba(255, 255, 255, 0.97);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.22);
+}
+
+.app-container.bg-verified .results {
+  background: rgba(255, 255, 255, 0.98);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.22);
+}
+
+/* ── Email Check Screen ──────────────────────────── */
+.email-screen-container {
+  min-height: 70vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px 0;
+}
+
+.email-card {
+  width: 100%;
+  max-width: 480px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 36px 32px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+  text-align: center;
+}
+
+.email-card-icon {
+  font-size: 2.2rem;
+  margin-bottom: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  background: #eff6ff;
+  border-radius: 50%;
+}
+
+.email-card-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin-bottom: 8px;
+}
+
+.email-card-subtitle {
+  color: #64748b;
+  font-size: 0.92rem;
+  margin-bottom: 24px;
+  line-height: 1.5;
+}
+
+.email-form {
+  margin-bottom: 16px;
+}
+
+.email-input-group {
+  display: flex;
+  gap: 10px;
+}
+
+.email-input {
+  flex: 1;
+  padding: 12px 16px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  color: #1e293b;
+  background: #f8fafc;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.email-input:focus {
+  border-color: #2563eb;
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+.email-submit-btn {
+  padding: 12px 20px;
+  background: #2563eb;
+  color: #ffffff;
+  font-size: 0.95rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+
+.email-submit-btn:hover:not(:disabled) {
+  background: #1d4ed8;
+  transform: translateY(-1px);
+}
+
+.email-submit-btn:disabled {
+  background: #94a3b8;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.not-eligible-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  padding: 14px 16px;
+  text-align: left;
+  margin-top: 16px;
+}
+
+.not-eligible-icon {
+  font-size: 1.25rem;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.not-eligible-text strong {
+  display: block;
+  font-size: 0.92rem;
+  margin-bottom: 4px;
+  color: #991b1b;
+}
+
+.not-eligible-text p {
+  font-size: 0.85rem;
+  color: #7f1d1d;
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* ── Verified Email Bar (Aadhaar step) ─────────────── */
+.verified-email-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 8px;
+  padding: 10px 16px;
+  margin-bottom: 24px;
+  font-size: 0.9rem;
+  color: #166534;
+}
+
+.verified-email-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.verified-badge-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  background: #22c55e;
+  color: #ffffff;
+  border-radius: 50%;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.change-email-btn {
+  background: transparent;
+  border: 1px solid #86efac;
+  color: #15803d;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.change-email-btn:hover {
+  background: #dcfce7;
+  color: #166534;
+}
+
 /* ── Responsive ──────────────────────────────────── */
 @media (max-width: 600px) {
   .form-row {
@@ -608,4 +878,13 @@
   .result-section {
     padding: 20px 16px;
   }
+
+  .email-input-group {
+    flex-direction: column;
+  }
+
+  .email-card {
+    padding: 24px 20px;
+  }
 }
+

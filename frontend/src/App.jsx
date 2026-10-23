@@ -52,7 +52,8 @@ function App() {
 
   const [isEmailSubmitted, setIsEmailSubmitted] = useState(false);
 
-  const handleEmailSubmit = async () => {
+  const handleEmailSubmit = async (e) => {
+    if (e) e.preventDefault();
     if (!email.trim()) return;
     setIsEmailSubmitted(true);
     setError(null);
@@ -62,7 +63,7 @@ function App() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email: email.trim() }),
       });
 
       if (!res.ok) {
@@ -73,50 +74,94 @@ function App() {
         setEmailCallResult(data);
       }
     } catch (err) {
-      setIsEmailSubmitted(false);
       setError(err.message || "Failed to check email availability");
+    } finally {
+      setIsEmailSubmitted(false);
     }
   };
 
+  const handleResetEmail = () => {
+    setEmailCallResult(null);
+    setResult(null);
+    setError(null);
+  };
+
   return (
-    <div className="app">
+    <div className={`app-container ${emailCallResult?.exists ? "bg-verified" : "bg-concert"}`}>
+      <div className="app">
+        {!emailCallResult?.exists ? (
+          <div className="email-screen-container">
+            <div className="email-card">
+              <div className="email-card-icon">🎟️</div>
+              <h1 className="email-card-title">Concert Entry Verification</h1>
+              <p className="email-card-subtitle">
+                Enter your registered email address to check ticket availability and verify your identity.
+              </p>
 
-      <input
-        type="text"
-        placeholder="email"
-        value={email}
-        disabled={isEmailSubmitted}
-        onChange={(e) => setEmail(e.target.value)}
-      />
+              <form onSubmit={handleEmailSubmit} className="email-form">
+                <div className="email-input-group">
+                  <input
+                    type="email"
+                    className="email-input"
+                    placeholder="Enter your registered email"
+                    value={email}
+                    disabled={isEmailSubmitted}
+                    onChange={(e) => setEmail(e.target.value)}
+                    autoFocus
+                    required
+                  />
+                  <button
+                    type="submit"
+                    className="email-submit-btn"
+                    disabled={isEmailSubmitted || !email.trim()}
+                  >
+                    {isEmailSubmitted ? "Checking..." : "Check Availability"}
+                  </button>
+                </div>
+              </form>
 
-      <button onClick={handleEmailSubmit} disabled={isEmailSubmitted}>
-        check for Email availabilty
-      </button>
+              {error && <div className="error-msg">{error}</div>}
 
-      {error && <div className="error-msg">{error}</div>}
-
-
-      {emailCallResult && (emailCallResult.exists ? (
-        <div>
-          <h1>Aadhaar Verification</h1>
-          <p className="app-subtitle">
-            Upload an official Aadhaar PDF from genuine sources and verify it
-            against registration details
-          </p>
-          <div className="privacy-banner">
-            🔒 <strong>Zero-Retention Verification:</strong> Uploaded Aadhaar PDFs
-            are verified in-memory and immediately destroyed. Only cryptographically
-            genuine PDFs signed by UIDAI are processed.
+              {emailCallResult && !emailCallResult.exists && (
+                <div className="not-eligible-card">
+                  <div className="not-eligible-icon">⚠️</div>
+                  <div className="not-eligible-text">
+                    <strong>Not Eligible for Entry</strong>
+                    <p>No confirmed ticket found for <em>{email}</em>. You are not eligible to attend the concert.</p>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
+        ) : (
+          <div className="verification-screen">
+            <div className="verified-email-bar">
+              <div className="verified-email-info">
+                <span className="verified-badge-icon">✓</span>
+                <span>Ticket verified for: <strong>{email}</strong></span>
+              </div>
+              <button type="button" className="change-email-btn" onClick={handleResetEmail}>
+                Change
+              </button>
+            </div>
 
-          <VerifyForm onSubmit={handleVerify} loading={loading} email={email} />
+            <h1>Aadhaar Verification</h1>
+            <p className="app-subtitle">
+              Upload an official Aadhaar PDF from genuine sources and verify it
+              against registration details
+            </p>
+            <div className="privacy-banner">
+              🔒 <strong>Zero-Retention Verification:</strong> Uploaded Aadhaar PDFs
+              are verified in-memory and immediately destroyed. Only cryptographically
+              genuine PDFs signed by UIDAI are processed.
+            </div>
 
-          {result && <Results data={result} />}
+            <VerifyForm onSubmit={handleVerify} loading={loading} email={email} />
 
-        </div>
-
-      ) : (<div>You are not eligible to attend the concert</div>))}
-
+            {result && <Results data={result} />}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
