@@ -190,6 +190,12 @@ function App() {
               genuine PDFs signed by UIDAI are processed.
             </div>
 
+            {error && (
+              <div className="error-msg" role="alert">
+                <strong>Error: </strong>{error}
+              </div>
+            )}
+
             <VerifyForm onSubmit={handleVerify} loading={loading} email={email} isTesting={SKIP_EMAIL_CHECK} />
 
             {result && <Results data={result} />}
