@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { fetchUserDetailsByEmail } from "../api";
 
-function VerifyForm({ onSubmit, loading, email }) {
+function VerifyForm({ onSubmit, loading, email, isTesting = true }) {
   const [name, setName] = useState("");
   const [dob, setDob] = useState("");
   const [file, setFile] = useState(null);
@@ -9,8 +9,9 @@ function VerifyForm({ onSubmit, loading, email }) {
   const [dragOver, setDragOver] = useState(false);
   const fileInputRef = useRef(null);
 
+  // When testing mode is off, automatically fetch details by email (original behavior)
   useEffect(() => {
-    if (email) {
+    if (!isTesting && email) {
       fetchUserDetailsByEmail(email).then((details) => {
         if (details) {
           if (details.name) setName(details.name);
@@ -18,7 +19,7 @@ function VerifyForm({ onSubmit, loading, email }) {
         }
       });
     }
-  }, [email]);
+  }, [email, isTesting]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -79,23 +80,46 @@ function VerifyForm({ onSubmit, loading, email }) {
     <form className="verify-form" onSubmit={handleSubmit}>
       <div className="form-row">
         <div className="form-group">
-          <label htmlFor="expected-name">Name (from registration)</label>
+          <label htmlFor="expected-name">Name {isTesting ? "" : "(from registration)"}</label>
           <input
             id="expected-name"
             type="text"
-            placeholder="Fetching registered name..."
+            placeholder={isTesting ? "Enter registered name (e.g. John Doe)" : "Fetching registered name..."}
             value={name}
-            readOnly
+            onChange={(e) => setName(e.target.value)}
+            readOnly={!isTesting}
+            required
           />
+          {/*
+            ORIGINAL READ-ONLY (without testing mode):
+            <input
+              id="expected-name"
+              type="text"
+              placeholder="Fetching registered name..."
+              value={name}
+              readOnly
+            />
+          */}
         </div>
         <div className="form-group">
-          <label htmlFor="expected-dob">Date of Birth (from registration)</label>
+          <label htmlFor="expected-dob">Date of Birth {isTesting ? "" : "(from registration)"}</label>
           <input
             id="expected-dob"
             type="date"
             value={dob}
-            readOnly
+            onChange={(e) => setDob(e.target.value)}
+            readOnly={!isTesting}
+            required
           />
+          {/*
+            ORIGINAL READ-ONLY (without testing mode):
+            <input
+              id="expected-dob"
+              type="date"
+              value={dob}
+              readOnly
+            />
+          */}
         </div>
       </div>
 

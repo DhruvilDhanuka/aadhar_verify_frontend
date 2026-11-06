@@ -1,36 +1,18 @@
 function Results({ data = {} }) {
   if (!data || Object.keys(data).length === 0) return null;
 
-  const verdict = data?.verdict; // "PASS", "FAIL", "RE-UPLOAD", "FLAG"
+  const verdict = data?.verdict; // "PASS", "FAIL", "RE-UPLOAD"
   const isPass = verdict === "PASS" || verdict === "PARTIAL_PASS";
   const isFail = verdict === "FAIL";
 
   const bannerClass = isPass ? "pass" : isFail ? "fail" : "reupload";
   const bannerIcon = isPass ? "✅" : isFail ? "❌" : "⚠️";
 
-  const qrData = data?.qr_data || {};
-  const ocrData = data?.ocr_data || {};
-  const regData = data?.registration_data || {};
-
-  // Extracted details directly from Aadhaar card
-  const extractedName =
-    qrData?.name || (isPass ? regData?.name : null);
-  const extractedDob =
-    qrData?.dob || ocrData?.detected_dob || (isPass ? regData?.dob : null);
-
-  // 18+ adult status and age from backend (with safe fallback if calling remote backend)
-  const isAdultBackend = data?.is_adult ?? regData?.is_adult;
-  const ageBackend = data?.age ?? regData?.age;
-
-  const fallbackAge = (() => {
-    const dob = extractedDob || regData?.dob;
-    if (!dob) return null;
-    const match = String(dob).match(/\b(19\d{2}|20\d{2})\b/);
-    return match ? new Date().getFullYear() - parseInt(match[1], 10) : null;
-  })();
-
-  const age = ageBackend != null ? ageBackend : fallbackAge;
-  const isAdult = isAdultBackend != null ? isAdultBackend : (age != null ? age >= 18 : null);
+  // Clean direct field access (with safe fallback for older response shapes)
+  const extractedName = data?.name ?? data?.qr_data?.name ?? null;
+  const extractedDob = data?.dob ?? data?.qr_data?.dob ?? data?.ocr_data?.detected_dob ?? null;
+  const age = data?.age ?? null;
+  const isAdult = data?.is_adult ?? (age != null ? age >= 18 : null);
 
   return (
     <div className="results minimal-results">
