@@ -24,10 +24,11 @@ function App() {
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [passwordRequired, setPasswordRequired] = useState(false);
   const [email, setEmail] = useState("");
   const [emailCallResult, setEmailCallResult] = useState(null);
 
-  const handleVerify = async ({ name, dob, file }) => {
+  const handleVerify = async ({ name, dob, file, password }) => {
     setLoading(true);
     setError(null);
     setResult(null);
@@ -36,6 +37,9 @@ function App() {
     formData.append("aadhaar_image", file);
     formData.append("expected_name", name);
     formData.append("expected_dob", dob);
+    if (password && password.trim()) {
+      formData.append("password", password.trim());
+    }
 
     try {
       const res = await fetch(API_VERIFY_URL, {
@@ -45,11 +49,20 @@ function App() {
 
       if (!res.ok) {
         const data = await res.json().catch(() => null);
-        throw new Error(data?.detail || `Server returned ${res.status}`);
+        const detail = data?.detail;
+        const code = typeof detail === "object" ? detail?.code : null;
+        const message = typeof detail === "object" ? detail?.message : (detail || `Server returned ${res.status}`);
+
+        if (code === "PASSWORD_REQUIRED" || (typeof message === "string" && message.toLowerCase().includes("password-protected"))) {
+          setPasswordRequired(true);
+        }
+
+        throw new Error(message);
       }
 
       const data = await res.json();
       setResult(data);
+      setPasswordRequired(false);
     } catch (err) {
       setError(err.message || "Something went wrong. Is the backend running?");
     } finally {
@@ -191,12 +204,26 @@ function App() {
             </div>
 
             {error && (
-              <div className="error-msg" role="alert">
-                <strong>Error: </strong>{error}
+              <div
+                className="bg-red-50 border border-red-200 border-l-4 border-l-red-500 rounded-lg p-3.5 mb-5 text-red-800 text-sm leading-relaxed shadow-sm flex items-start gap-2.5"
+                role="alert"
+              >
+                <span className="text-base leading-none select-none mt-0.5">⚠️</span>
+                <div>
+                  <strong className="font-semibold text-red-900">Error: </strong>
+                  <span>{error}</span>
+                </div>
               </div>
             )}
 
-            <VerifyForm onSubmit={handleVerify} loading={loading} email={email} isTesting={SKIP_EMAIL_CHECK} />
+            <VerifyForm
+              onSubmit={handleVerify}
+              loading={loading}
+              email={email}
+              isTesting={SKIP_EMAIL_CHECK}
+              passwordRequired={passwordRequired}
+              onResetPasswordPrompt={() => setPasswordRequired(false)}
+            />
 
             {result && <Results data={result} />}
           </div>

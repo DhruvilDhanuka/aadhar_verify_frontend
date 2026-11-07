@@ -1,13 +1,22 @@
 import { useState, useRef, useEffect } from "react";
 import { fetchUserDetailsByEmail } from "../api";
 
-function VerifyForm({ onSubmit, loading, email, isTesting = true }) {
+function VerifyForm({ onSubmit, loading, email, isTesting = true, passwordRequired = false, onResetPasswordPrompt }) {
   const [name, setName] = useState("");
   const [dob, setDob] = useState("");
+  const [password, setPassword] = useState("");
   const [file, setFile] = useState(null);
   const [fileError, setFileError] = useState(null);
   const [dragOver, setDragOver] = useState(false);
   const fileInputRef = useRef(null);
+  const passwordInputRef = useRef(null);
+
+  // Focus password input when prompt becomes active
+  useEffect(() => {
+    if (passwordRequired && passwordInputRef.current) {
+      passwordInputRef.current.focus();
+    }
+  }, [passwordRequired]);
 
   // When testing mode is off, automatically fetch details by email (original behavior)
   useEffect(() => {
@@ -30,7 +39,7 @@ function VerifyForm({ onSubmit, loading, email, isTesting = true }) {
       const [y, m, d] = dob.split("-");
       formattedDob = `${d}-${m}-${y}`;
     }
-    onSubmit({ name: name.trim(), dob: formattedDob, file });
+    onSubmit({ name: name.trim(), dob: formattedDob, file, password: password.trim() });
   };
 
   const isPdfFile = (f) => {
@@ -43,6 +52,8 @@ function VerifyForm({ onSubmit, loading, email, isTesting = true }) {
     if (isPdfFile(f)) {
       setFile(f);
       setFileError(null);
+      setPassword("");
+      if (onResetPasswordPrompt) onResetPasswordPrompt();
     } else {
       setFile(null);
       setFileError("Only genuine PDF documents from UIDAI, DigiLocker, or mAadhaar are accepted. Images, scans, and screenshots cannot be verified.");
@@ -182,12 +193,44 @@ function VerifyForm({ onSubmit, loading, email, isTesting = true }) {
         />
       </div>
 
+      {passwordRequired && (
+        <div className="bg-blue-50/90 border border-blue-200 border-l-4 border-l-blue-600 rounded-lg p-4 mb-5 shadow-sm">
+          <div className="flex items-center gap-2 font-semibold text-base text-blue-900 mb-1.5">
+
+            <label htmlFor="manual-pdf-password" className="cursor-pointer">
+              Enter PDF Password
+            </label>
+          </div>
+          <p className="text-xs sm:text-sm text-blue-800 m-0 mb-3 leading-relaxed">
+            This e-Aadhaar PDF is password-protected and could not be unlocked automatically. Please enter your password below to proceed:
+          </p>
+          <div className="mb-2">
+            <input
+              id="manual-pdf-password"
+              ref={passwordInputRef}
+              type="text"
+              className="w-full px-3.5 py-2.5 text-base tracking-wider font-semibold text-slate-900 bg-white border border-blue-300 rounded-md outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-500/20 box-border transition-all"
+              placeholder="e.g. FIRST4NAME + YEAR (e.g., AMAN2002)"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </div>
+          <small className="block text-xs text-slate-600 leading-normal">
+            <strong className="font-semibold text-slate-700">UIDAI Rule:</strong> First 4 letters of your Name in CAPITAL + 4-digit Year of Birth.
+          </small>
+        </div>
+      )}
+
       <button
         type="submit"
-        className={`submit-btn${loading ? " loading" : ""}`}
-        disabled={!file || loading}
+        className={`submit-btn${loading ? " loading" : ""}${passwordRequired ? " !bg-blue-600 hover:!bg-blue-700 !border-blue-700" : ""
+          }`}
+        disabled={!file || loading || (passwordRequired && !password.trim())}
       >
-        {loading ? "Verifying Digital Signature & Credentials..." : "Verify Aadhaar"}
+        {loading
+          ? (passwordRequired ? "Unlocking & Verifying..." : "Verifying Digital Signature & Credentials...")
+          : (passwordRequired ? "Unlock & Verify Aadhaar" : "Verify Aadhaar")}
       </button>
     </form>
   );
